@@ -2,12 +2,16 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using SchedulingAPI.Data;
+using SchedulingAPI.Data.Repositories.StudentRepository;
+using SchedulingAPI.Services.StudentService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,10 +31,26 @@ namespace SchedulingAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
             services.AddDbContext<SchedulingDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
+
+            services.AddTransient<IStudentRepository, StudentRepository>();
+
+            services.AddTransient<IStudentService, StudentService>();
+
+            //Register the swagger generator
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "Scheduling API",
+                    Description = "A Super Simple Scheduling System"
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,6 +66,13 @@ namespace SchedulingAPI
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Scheduling API");
+            });
 
             app.UseEndpoints(endpoints =>
             {

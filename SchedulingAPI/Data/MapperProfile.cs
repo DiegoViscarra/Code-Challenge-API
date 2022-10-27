@@ -11,6 +11,7 @@ namespace SchedulingAPI.Data
             this.CreateMap<Class, ClassDTO>().ReverseMap();
             this.CreateMap<Registration, RegistrationDTO>().ReverseMap();
             this.CreateMap<Student, StudentDTO>().ReverseMap();
+            this.CreateMap<Student, SimpleStudentDTO>().ReverseMap();
         }
     }
 }
