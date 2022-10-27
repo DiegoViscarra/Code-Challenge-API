@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SchedulingAPI.Data;
+using SchedulingAPI.Data.Repositories.StudentRepository;
+using SchedulingAPI.Services.StudentService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +33,10 @@ namespace SchedulingAPI
             services.AddAutoMapper(typeof(Startup));
             services.AddDbContext<SchedulingDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
+
+            services.AddTransient<IStudentRepository, StudentRepository>();
+
+            services.AddTransient<IStudentService, StudentService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
