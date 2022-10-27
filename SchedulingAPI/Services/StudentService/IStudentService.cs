@@ -9,5 +9,6 @@ namespace SchedulingAPI.Services.StudentService
     public interface IStudentService
     {
         Task<SimpleStudentDTO> AddStudent(SimpleStudentDTO simpleStudentDTO);
+        Task<SimpleStudentDTO> UpdateStudent(int studentId, SimpleStudentDTO student);
     }
 }
