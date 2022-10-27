@@ -27,5 +27,25 @@ namespace SchedulingAPI.Services.StudentService
                 return mapper.Map<SimpleStudentDTO>(student);
             throw new Exception("Student was not added");
         }
+
+        public async Task<SimpleStudentDTO> UpdateStudent(int studentId, SimpleStudentDTO simpleStudentDTO)
+        {
+            var studentToUpdate = await repository.GetStudent(studentId);
+            if (studentToUpdate == null)
+                throw new Exception("Student not found");
+            if (simpleStudentDTO.StudentId != 0 && simpleStudentDTO.StudentId != studentId)
+                throw new Exception("Path Id and Body Id have to be the same");
+            if (simpleStudentDTO.FirstName == null)
+                simpleStudentDTO.FirstName = studentToUpdate.FirstName;
+            if (simpleStudentDTO.LastName == null)
+                simpleStudentDTO.LastName = studentToUpdate.LastName;
+            simpleStudentDTO.StudentId = studentId;
+            repository.DetachEntity(studentToUpdate);
+            var student = mapper.Map<Student>(simpleStudentDTO);
+            repository.UpdateStudent(studentId, student);
+            if (await repository.SaveChangesAsync())
+                return mapper.Map<SimpleStudentDTO>(student);
+            throw new Exception("There was an error with the DB");
+        }
     }
 }
