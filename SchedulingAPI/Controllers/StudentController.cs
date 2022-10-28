@@ -18,6 +18,20 @@ namespace SchedulingAPI.Controllers
             this.studentService = studentService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<SimpleStudentDTO>> GetAllStudents()
+        {
+            try
+            {
+                var students = await studentService.GetAllStudents();
+                return Ok(students);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<SimpleStudentDTO>> GetStudentById(int id)
         {

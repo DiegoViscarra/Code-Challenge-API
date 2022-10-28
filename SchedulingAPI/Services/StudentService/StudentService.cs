@@ -19,13 +19,20 @@ namespace SchedulingAPI.Services.StudentService
             this.mapper = mapper;
         }
 
+        public async Task<IEnumerable<SimpleStudentDTO>> GetAllStudents()
+        {
+            var students = await studentRepository.GetAllStudents();
+            var simpleStudentDTOs = mapper.Map<IEnumerable<SimpleStudentDTO>>(students);
+            return simpleStudentDTOs;
+        }
+
         public async Task<SimpleStudentDTO> GetStudentById(int studentId)
         {
             var student = await studentRepository.GetStudentById(studentId);
             if (student == null)
                 throw new Exception("Student not found");
-            var studentDTO = mapper.Map<SimpleStudentDTO>(student);
-            return studentDTO;
+            var simpleStudentDTO = mapper.Map<SimpleStudentDTO>(student);
+            return simpleStudentDTO;
         }
 
         public async Task<SimpleStudentDTO> AddStudent(SimpleStudentDTO simpleStudentDTO)
