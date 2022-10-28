@@ -6,8 +6,8 @@ namespace SchedulingAPI.Models.DTOs
     public class RegistrationToClassDTO
     {
         [Required]
-        public SimpleClassDTO ClassDTO { get; set; }
+        public SimpleClassDTO SimpleClassDTO { get; set; }
         [Required]
-        public IEnumerable<SimpleStudentDTO> StudentsDTOs { get; set; }
+        public IEnumerable<SimpleStudentDTO> SimpleStudentsDTOs { get; set; }
     }
 }

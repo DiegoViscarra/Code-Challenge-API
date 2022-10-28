@@ -18,6 +18,24 @@ namespace SchedulingAPI.Controllers
             this.service = service;
         }
 
+        [HttpPost("/classes")]
+        public async Task<ActionResult<RegistrationToClassDTO>> PostRegistrationClasses([FromBody] RegistrationToStudentDTO registrationToStudentDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var createdRegistration = await service.RegisterClasses(registrationToStudentDTO);
+                return Created($"/api/registration/classes", createdRegistration);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
+        }
+
         [HttpPost("/students")]
         public async Task<ActionResult<RegistrationToClassDTO>> PostRegistrationStudents([FromBody] RegistrationToClassDTO registrationToClassDTO)
         {
