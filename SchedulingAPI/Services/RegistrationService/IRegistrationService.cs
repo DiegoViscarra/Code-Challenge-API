@@ -8,6 +8,7 @@ namespace SchedulingAPI.Services.RegistrationService
 {
     public interface IRegistrationService
     {
+        Task<RegistrationToStudentDTO> RegisterClasses(RegistrationToStudentDTO registrationToStudentDTO);
         Task<RegistrationToClassDTO> RegisterStudents(RegistrationToClassDTO registrationToClassDTO);
     }
 }
