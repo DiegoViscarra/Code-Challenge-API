@@ -10,5 +10,6 @@ namespace SchedulingAPI.Services.RegistrationService
     {
         Task<RegistrationToStudentDTO> RegisterClasses(RegistrationToStudentDTO registrationToStudentDTO);
         Task<RegistrationToClassDTO> RegisterStudents(RegistrationToClassDTO registrationToClassDTO);
+        Task<bool> DeleteRegistration(int code, int studentId);
     }
 }

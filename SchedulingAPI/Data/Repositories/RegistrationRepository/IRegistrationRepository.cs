@@ -8,7 +8,9 @@ namespace SchedulingAPI.Data.Repositories.RegistrationRepository
 {
     public interface IRegistrationRepository
     {
+        Task<Registration> GetRegistration(int code, int studentId);
         void AddRegistration(List<Registration> registrations);
+        Task DeleteRegistration(int code, int studentId);
         Task<bool> SaveChangesAsync();
     }
 }
