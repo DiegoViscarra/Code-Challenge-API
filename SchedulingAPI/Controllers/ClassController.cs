@@ -35,5 +35,23 @@ namespace SchedulingAPI.Controllers
                 throw new Exception("Error:", e);
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<SimpleClassDTO>> PutClass(int id, [FromBody] SimpleClassDTO simpleClassDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var classUpdated = await service.UpdateClass(id, simpleClassDTO);
+                return Ok(classUpdated);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
+        }
     }
 }
