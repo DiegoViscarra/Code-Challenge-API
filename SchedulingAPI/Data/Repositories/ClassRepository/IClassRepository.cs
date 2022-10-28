@@ -8,7 +8,10 @@ namespace SchedulingAPI.Data.Repositories.ClassRepository
 {
     public interface IClassRepository
     {
+        Task<Class> GetClass(int code);
         void AddClass(Class course);
+        void UpdateClass(int code, Class course);
         Task<bool> SaveChangesAsync();
+        void DetachEntity<T>(T entity) where T : class;
     }
 }
