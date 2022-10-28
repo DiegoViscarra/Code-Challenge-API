@@ -52,14 +52,10 @@ namespace SchedulingAPI.Services.RegistrationService
 
         private async Task<bool> ValidateRegistrationToStudent(RegistrationToStudentDTO registrationToStudentDTO)
         {
-            var student = await studentRepository.GetStudent(registrationToStudentDTO.SimpleStudentDTO.StudentId);
-            if (student == null)
-                throw new Exception("Student not found");
+            await ValidateStudent(registrationToStudentDTO.SimpleStudentDTO.StudentId);
             foreach (var classDTO in registrationToStudentDTO.SimpleClassesDTOs)
             {
-                var course = await classRepository.GetClass(classDTO.Code);
-                if (course == null)
-                    throw new Exception("Class not found");
+                await ValidateClass(classDTO.Code);
             }
             return true;
         }
@@ -91,16 +87,44 @@ namespace SchedulingAPI.Services.RegistrationService
 
         private async Task<bool> ValidateRegistrationToClass(RegistrationToClassDTO registrationToClassDTO)
         {
-            var course = await classRepository.GetClass(registrationToClassDTO.SimpleClassDTO.Code);
-            if (course == null)
-                throw new Exception("Class not found");
+            await ValidateClass(registrationToClassDTO.SimpleClassDTO.Code);
             foreach (var studentDTO in registrationToClassDTO.SimpleStudentsDTOs)
             {
-                var student = await studentRepository.GetStudent(studentDTO.StudentId);
-                if (student == null)
-                    throw new Exception("Student not found");
+                await ValidateStudent(studentDTO.StudentId);
             }
             return true;
+        }
+
+        public async Task<bool> DeleteRegistration(int code, int studentId)
+        {
+            await ValidateClass(code);
+            await ValidateStudent(studentId);
+            await ValidateRegistration(code, studentId);
+            await repository.DeleteRegistration(code, studentId);
+            if (await repository.SaveChangesAsync())
+                return true;
+            return false;
+        }
+
+        private async Task ValidateClass(int code)
+        {
+            var course = await classRepository.GetClass(code);
+            if (course == null)
+                throw new Exception("Class not found");
+        }
+
+        private async Task ValidateStudent(int studentId)
+        {
+            var student = await studentRepository.GetStudent(studentId);
+            if (student == null)
+                throw new Exception("Student not found");
+        }
+
+        private async Task ValidateRegistration(int code, int studentId)
+        {
+            var registration = await repository.GetRegistration(code, studentId);
+            if (registration == null)
+                throw new Exception("Registration not found");
         }
     }
 }
