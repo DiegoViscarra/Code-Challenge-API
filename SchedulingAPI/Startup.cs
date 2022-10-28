@@ -11,8 +11,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using SchedulingAPI.Data;
 using SchedulingAPI.Data.Repositories.ClassRepository;
+using SchedulingAPI.Data.Repositories.RegistrationRepository;
 using SchedulingAPI.Data.Repositories.StudentRepository;
 using SchedulingAPI.Services.ClassService;
+using SchedulingAPI.Services.RegistrationService;
 using SchedulingAPI.Services.StudentService;
 using System;
 using System.Collections.Generic;
@@ -40,11 +42,13 @@ namespace SchedulingAPI
             options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
 
             services.AddTransient<IClassRepository, ClassRepository>();
+            services.AddTransient<IRegistrationRepository, RegistrationRepository>();
             services.AddTransient<IStudentRepository, StudentRepository>();
 
             services.AddTransient<IClassService, ClassService>();
+            services.AddTransient<IRegistrationService, RegistrationService>();
             services.AddTransient<IStudentService, StudentService>();
-
+            
             //Register the swagger generator
             services.AddSwaggerGen(c =>
             {
