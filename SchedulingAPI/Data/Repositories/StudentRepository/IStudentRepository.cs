@@ -8,7 +8,7 @@ namespace SchedulingAPI.Data.Repositories.StudentRepository
 {
     public interface IStudentRepository
     {
-        Task<Student> GetStudent(int studentId);
+        Task<Student> GetStudentById(int studentId);
         void AddStudent(Student student);
         void UpdateStudent(int studentId, Student student);
         Task<bool> SaveChangesAsync();

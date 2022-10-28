@@ -15,7 +15,7 @@ namespace SchedulingAPI.Data.Repositories.StudentRepository
             this.dbContext = dbContext;
         }
 
-        public async Task<Student> GetStudent(int studentId)
+        public async Task<Student> GetStudentById(int studentId)
         {
             IQueryable<Student> query = dbContext.Students;
             query = query.AsNoTracking();

@@ -12,10 +12,24 @@ namespace SchedulingAPI.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        private readonly IStudentService service;
-        public StudentController(IStudentService service)
+        private readonly IStudentService studentService;
+        public StudentController(IStudentService studentService)
         {
-            this.service = service;
+            this.studentService = studentService;
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<SimpleStudentDTO>> GetStudentById(int id)
+        {
+            try
+            {
+                var student = await studentService.GetStudentById(id);
+                return Ok(student);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
         }
 
         [HttpPost]
@@ -27,7 +41,7 @@ namespace SchedulingAPI.Controllers
             }
             try
             {
-                var createdStudent = await service.AddStudent(simpleStudentDTO);
+                var createdStudent = await studentService.AddStudent(simpleStudentDTO);
                 return Created($"/api/student/{createdStudent.StudentId}", createdStudent);
             }
             catch (Exception e)
@@ -45,7 +59,7 @@ namespace SchedulingAPI.Controllers
             }
             try
             {
-                var studentUpdated = await service.UpdateStudent(id, simpleStudentDTO);
+                var studentUpdated = await studentService.UpdateStudent(id, simpleStudentDTO);
                 return Ok(studentUpdated);
             }
             catch (Exception e)

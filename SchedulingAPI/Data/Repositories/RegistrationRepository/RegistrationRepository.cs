@@ -15,7 +15,7 @@ namespace SchedulingAPI.Data.Repositories.RegistrationRepository
             this.dbContext = dbContext;
         }
 
-        public async Task<Registration> GetRegistration(int code, int studentId)
+        public async Task<Registration> GetRegistrationByIds(int code, int studentId)
         {
             IQueryable<Registration> query = dbContext.Registrations;
             query = query.AsNoTracking();

@@ -13,13 +13,13 @@ namespace SchedulingAPI.Services.RegistrationService
 {
     public class RegistrationService : IRegistrationService
     {
-        private readonly IRegistrationRepository repository;
+        private readonly IRegistrationRepository registrationRepository;
         private readonly IClassRepository classRepository;
         private readonly IStudentRepository studentRepository;
         private readonly IMapper mapper;
-        public RegistrationService(IRegistrationRepository repository, IClassRepository classRepository, IStudentRepository studentRepository, IMapper mapper)
+        public RegistrationService(IRegistrationRepository registrationRepository, IClassRepository classRepository, IStudentRepository studentRepository, IMapper mapper)
         {
-            this.repository = repository;
+            this.registrationRepository = registrationRepository;
             this.classRepository = classRepository;
             this.studentRepository = studentRepository;
             this.mapper = mapper;
@@ -41,8 +41,8 @@ namespace SchedulingAPI.Services.RegistrationService
                     registrationsDTOs.Add(registrationDTO);
                 }
                 var registrations = mapper.Map<List<Registration>>(registrationsDTOs);
-                repository.AddRegistration(registrations);
-                if (await repository.SaveChangesAsync())
+                registrationRepository.AddRegistration(registrations);
+                if (await registrationRepository.SaveChangesAsync())
                     return registrationToStudentDTO;
                 throw new Exception("Classes were not registered");
             }
@@ -61,7 +61,7 @@ namespace SchedulingAPI.Services.RegistrationService
 
         private async Task ValidateNotDoubleRegistration(int code, int studentId)
         {
-            var course = await repository.GetRegistration(code, studentId);
+            var course = await registrationRepository.GetRegistrationByIds(code, studentId);
             if (course != null)
                 throw new Exception("The student is already registered to the class");
         }
@@ -82,8 +82,8 @@ namespace SchedulingAPI.Services.RegistrationService
                     registrationsDTOs.Add(registrationDTO);
                 }
                 var registrations = mapper.Map<List<Registration>>(registrationsDTOs);
-                repository.AddRegistration(registrations);
-                if (await repository.SaveChangesAsync())
+                registrationRepository.AddRegistration(registrations);
+                if (await registrationRepository.SaveChangesAsync())
                     return registrationToClassDTO;
                 throw new Exception("Students were not registered");
             }
@@ -105,8 +105,8 @@ namespace SchedulingAPI.Services.RegistrationService
             await ValidateClass(code);
             await ValidateStudent(studentId);
             await ValidateRegistration(code, studentId);
-            await repository.DeleteRegistration(code, studentId);
-            if (await repository.SaveChangesAsync())
+            await registrationRepository.DeleteRegistration(code, studentId);
+            if (await registrationRepository.SaveChangesAsync())
                 return true;
             return false;
         }
@@ -120,14 +120,14 @@ namespace SchedulingAPI.Services.RegistrationService
 
         private async Task ValidateStudent(int studentId)
         {
-            var student = await studentRepository.GetStudent(studentId);
+            var student = await studentRepository.GetStudentById(studentId);
             if (student == null)
                 throw new Exception("Student not found");
         }
 
         private async Task ValidateRegistration(int code, int studentId)
         {
-            var registration = await repository.GetRegistration(code, studentId);
+            var registration = await registrationRepository.GetRegistrationByIds(code, studentId);
             if (registration == null)
                 throw new Exception("Registration not found");
         }

@@ -11,26 +11,35 @@ namespace SchedulingAPI.Services.StudentService
 {
     public class StudentService : IStudentService
     {
-        private readonly IStudentRepository repository;
+        private readonly IStudentRepository studentRepository;
         private readonly IMapper mapper;
-        public StudentService(IStudentRepository repository, IMapper mapper)
+        public StudentService(IStudentRepository studentRepository, IMapper mapper)
         {
-            this.repository = repository;
+            this.studentRepository = studentRepository;
             this.mapper = mapper;
+        }
+
+        public async Task<SimpleStudentDTO> GetStudentById(int studentId)
+        {
+            var student = await studentRepository.GetStudentById(studentId);
+            if (student == null)
+                throw new Exception("Student not found");
+            var studentDTO = mapper.Map<SimpleStudentDTO>(student);
+            return studentDTO;
         }
 
         public async Task<SimpleStudentDTO> AddStudent(SimpleStudentDTO simpleStudentDTO)
         {
             var student = mapper.Map<Student>(simpleStudentDTO);
-            repository.AddStudent(student);
-            if (await repository.SaveChangesAsync())
+            studentRepository.AddStudent(student);
+            if (await studentRepository.SaveChangesAsync())
                 return mapper.Map<SimpleStudentDTO>(student);
             throw new Exception("Student was not added");
         }
 
         public async Task<SimpleStudentDTO> UpdateStudent(int studentId, SimpleStudentDTO simpleStudentDTO)
         {
-            var studentToUpdate = await repository.GetStudent(studentId);
+            var studentToUpdate = await studentRepository.GetStudentById(studentId);
             if (studentToUpdate == null)
                 throw new Exception("Student not found");
             if (simpleStudentDTO.StudentId != 0 && simpleStudentDTO.StudentId != studentId)
@@ -39,10 +48,10 @@ namespace SchedulingAPI.Services.StudentService
                 simpleStudentDTO.FirstName = studentToUpdate.FirstName;
             if (simpleStudentDTO.LastName == null)
                 simpleStudentDTO.LastName = studentToUpdate.LastName;
-            repository.DetachEntity(studentToUpdate);
+            studentRepository.DetachEntity(studentToUpdate);
             var student = mapper.Map<Student>(simpleStudentDTO);
-            repository.UpdateStudent(studentId, student);
-            if (await repository.SaveChangesAsync())
+            studentRepository.UpdateStudent(studentId, student);
+            if (await studentRepository.SaveChangesAsync())
                 return mapper.Map<SimpleStudentDTO>(student);
             throw new Exception("There was an error with the DB");
         }
