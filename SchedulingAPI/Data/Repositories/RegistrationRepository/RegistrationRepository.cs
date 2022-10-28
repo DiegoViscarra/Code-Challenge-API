@@ -1,4 +1,5 @@
-﻿using SchedulingAPI.Data.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using SchedulingAPI.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +15,22 @@ namespace SchedulingAPI.Data.Repositories.RegistrationRepository
             this.dbContext = dbContext;
         }
 
+        public async Task<Registration> GetRegistration(int code, int studentId)
+        {
+            IQueryable<Registration> query = dbContext.Registrations;
+            query = query.AsNoTracking();
+            return await query.SingleOrDefaultAsync(r => r.Code == code && r.StudentId == studentId);
+        }
+
         public void AddRegistration(List<Registration> registrations)
         {
             dbContext.Registrations.AddRange(registrations);
+        }
+
+        public async Task DeleteRegistration(int code, int studentId)
+        {
+            var registration = await dbContext.Registrations.FirstAsync(r => r.Code == code && r.StudentId == studentId);
+            dbContext.Registrations.Remove(registration);
         }
 
         public async Task<bool> SaveChangesAsync()
