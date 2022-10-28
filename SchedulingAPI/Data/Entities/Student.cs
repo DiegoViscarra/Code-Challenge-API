@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SchedulingAPI.Data.Entities
@@ -15,7 +14,5 @@ namespace SchedulingAPI.Data.Entities
         [Required]
         [Column(TypeName = "nvarchar(20)")]
         public string LastName { get; set; }
-
-        public ICollection<Registration> Registrations { get; set; }
     }
 }
