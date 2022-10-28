@@ -27,5 +27,24 @@ namespace SchedulingAPI.Services.ClassService
                 return mapper.Map<SimpleClassDTO>(course);
             throw new Exception("Class was not added");
         }
+
+        public async Task<SimpleClassDTO> UpdateClass(int code, SimpleClassDTO simpleClassDTO)
+        {
+            var classToUpdate = await repository.GetClass(code);
+            if (classToUpdate == null)
+                throw new Exception("Class not found");
+            if (simpleClassDTO.Code != 0 && simpleClassDTO.Code != code)
+                throw new Exception("Path Id and Body Id have to be the same");
+            if (simpleClassDTO.Title == null)
+                simpleClassDTO.Title = classToUpdate.Title;
+            if (simpleClassDTO.Description == null)
+                simpleClassDTO.Description = classToUpdate.Description;
+            repository.DetachEntity(classToUpdate);
+            var course = mapper.Map<Class>(simpleClassDTO);
+            repository.UpdateClass(code, course);
+            if (await repository.SaveChangesAsync())
+                return mapper.Map<SimpleClassDTO>(course);
+            throw new Exception("There was an error with the DB");
+        }
     }
 }

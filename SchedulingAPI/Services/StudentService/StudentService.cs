@@ -39,7 +39,6 @@ namespace SchedulingAPI.Services.StudentService
                 simpleStudentDTO.FirstName = studentToUpdate.FirstName;
             if (simpleStudentDTO.LastName == null)
                 simpleStudentDTO.LastName = studentToUpdate.LastName;
-            simpleStudentDTO.StudentId = studentId;
             repository.DetachEntity(studentToUpdate);
             var student = mapper.Map<Student>(simpleStudentDTO);
             repository.UpdateStudent(studentId, student);
