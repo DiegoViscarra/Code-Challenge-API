@@ -32,12 +32,11 @@ namespace SchedulingAPI.Services.RegistrationService
                 List<RegistrationDTO> registrationsDTOs = new List<RegistrationDTO>();
                 foreach (var classDTO in registrationToStudentDTO.SimpleClassesDTOs)
                 {
+                    await ValidateNotDoubleRegistration(classDTO.Code, registrationToStudentDTO.SimpleStudentDTO.StudentId);
                     RegistrationDTO registrationDTO = new RegistrationDTO
                     {
                         Code = classDTO.Code,
-                        SimpleClassDTO = classDTO,
-                        StudentId = registrationToStudentDTO.SimpleStudentDTO.StudentId,
-                        SimpleStudentDTO = registrationToStudentDTO.SimpleStudentDTO
+                        StudentId = registrationToStudentDTO.SimpleStudentDTO.StudentId
                     };
                     registrationsDTOs.Add(registrationDTO);
                 }
@@ -60,6 +59,13 @@ namespace SchedulingAPI.Services.RegistrationService
             return true;
         }
 
+        private async Task ValidateNotDoubleRegistration(int code, int studentId)
+        {
+            var course = await repository.GetRegistration(code, studentId);
+            if (course != null)
+                throw new Exception("The student is already registered to the class");
+        }
+
         public async Task<RegistrationToClassDTO> RegisterStudents(RegistrationToClassDTO registrationToClassDTO)
         {
             if (await ValidateRegistrationToClass(registrationToClassDTO))
@@ -67,12 +73,11 @@ namespace SchedulingAPI.Services.RegistrationService
                 List<RegistrationDTO> registrationsDTOs = new List<RegistrationDTO>();
                 foreach (var studentDTO in registrationToClassDTO.SimpleStudentsDTOs)
                 {
+                    await ValidateNotDoubleRegistration(registrationToClassDTO.SimpleClassDTO.Code, studentDTO.StudentId);
                     RegistrationDTO registrationDTO = new RegistrationDTO
                     {
                         Code = registrationToClassDTO.SimpleClassDTO.Code,
-                        SimpleClassDTO = registrationToClassDTO.SimpleClassDTO,
-                        StudentId = studentDTO.StudentId,
-                        SimpleStudentDTO = studentDTO
+                        StudentId = studentDTO.StudentId
                     };
                     registrationsDTOs.Add(registrationDTO);
                 }
