@@ -1,0 +1,13 @@
+﻿using SchedulingAPI.Models.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace SchedulingAPI.Services.RegistrationService
+{
+    public interface IRegistrationService
+    {
+        Task<RegistrationToClassDTO> RegisterStudents(RegistrationToClassDTO registrationToClassDTO);
+    }
+}
