@@ -20,14 +20,6 @@ namespace SchedulingAPI.Data
 
             modelBuilder.Entity<Registration>().ToTable("Registrations");
             modelBuilder.Entity<Registration>().HasKey(r => new { r.Code, r.StudentId });
-            modelBuilder.Entity<Registration>()
-                .HasOne(r => r.Class)
-                .WithMany(c => c.Registrations)
-                .HasForeignKey(r => r.Code);
-            modelBuilder.Entity<Registration>()
-                .HasOne(r => r.Student)
-                .WithMany(s => s.Registrations)
-                .HasForeignKey(r => r.StudentId);
         }
 
         public DbSet<Class> Classes { get; set; }
