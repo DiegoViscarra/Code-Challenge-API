@@ -15,6 +15,6 @@ namespace SchedulingAPI.Models.DTOs
         [StringLength(20, ErrorMessage = "Last name length can't be more than 20.")]
         public string LastName { get; set; }
 
-        public IEnumerable<Registration> Registrations { get; set; }
+        public IEnumerable<SimpleClassDTO> simpleClassesDTOs { get; set; }
     }
 }

@@ -15,11 +15,19 @@ namespace SchedulingAPI.Data.Repositories.RegistrationRepository
             this.dbContext = dbContext;
         }
 
-        public async Task<Registration> GetRegistration(int code, int studentId)
+        public async Task<Registration> GetRegistrationByIds(int code, int studentId)
         {
             IQueryable<Registration> query = dbContext.Registrations;
             query = query.AsNoTracking();
             return await query.SingleOrDefaultAsync(r => r.Code == code && r.StudentId == studentId);
+        }
+
+        public async Task<IEnumerable<Registration>> GetRegistrationsByStudentId(int studentId)
+        {
+            IQueryable<Registration> query = dbContext.Registrations;
+            query = query.Where(q => q.StudentId == studentId);
+            query = query.AsNoTracking();
+            return await query.ToArrayAsync();
         }
 
         public void AddRegistration(List<Registration> registrations)
