@@ -8,6 +8,7 @@ namespace SchedulingAPI.Services.ClassService
 {
     public interface IClassService
     {
+        Task<IEnumerable<SimpleClassDTO>> GetAllClasses();
         Task<SimpleClassDTO> GetClassByCode(int code);
         Task<SimpleClassDTO> AddClass(SimpleClassDTO simpleClassDTO);
         Task<SimpleClassDTO> UpdateClass(int code, SimpleClassDTO simpleClassDTO);

@@ -15,6 +15,13 @@ namespace SchedulingAPI.Data.Repositories.ClassRepository
             this.dbContext = dbContext;
         }
 
+        public async Task<IEnumerable<Class>> GetAllClasses()
+        {
+            IQueryable<Class> query = dbContext.Classes;
+            query = query.AsNoTracking();
+            return await query.ToArrayAsync();
+        }
+
         public async Task<Class> GetClassByCode(int code)
         {
             IQueryable<Class> query = dbContext.Classes;

@@ -18,6 +18,20 @@ namespace SchedulingAPI.Controllers
             this.classService = classService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<SimpleClassDTO>> GetAllClasses()
+        {
+            try
+            {
+                var classes = await classService.GetAllClasses();
+                return Ok(classes);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
+        }
+
         [HttpGet("{code}")]
         public async Task<ActionResult<SimpleClassDTO>> GetClassByCode(int code)
         {

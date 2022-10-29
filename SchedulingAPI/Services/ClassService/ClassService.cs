@@ -19,6 +19,13 @@ namespace SchedulingAPI.Services.ClassService
             this.mapper = mapper;
         }
 
+        public async Task<IEnumerable<SimpleClassDTO>> GetAllClasses()
+        {
+            var classes = await classRepository.GetAllClasses();
+            var SimpleClassesDTOs = mapper.Map<IEnumerable<SimpleClassDTO>>(classes);
+            return SimpleClassesDTOs;
+        }
+
         public async Task<SimpleClassDTO> GetClassByCode(int code)
         {
             var course = await ValidateClass(code);
