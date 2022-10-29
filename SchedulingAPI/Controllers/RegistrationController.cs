@@ -12,10 +12,10 @@ namespace SchedulingAPI.Controllers
     [ApiController]
     public class RegistrationController : ControllerBase
     {
-        private readonly IRegistrationService service;
-        public RegistrationController(IRegistrationService service)
+        private readonly IRegistrationService registrationService;
+        public RegistrationController(IRegistrationService registrationService)
         {
-            this.service = service;
+            this.registrationService = registrationService;
         }
 
         [HttpPost("/classes")]
@@ -27,7 +27,7 @@ namespace SchedulingAPI.Controllers
             }
             try
             {
-                var createdRegistration = await service.RegisterClasses(registrationToStudentDTO);
+                var createdRegistration = await registrationService.RegisterClasses(registrationToStudentDTO);
                 return Created($"/api/registration/classes", createdRegistration);
             }
             catch (Exception e)
@@ -45,7 +45,7 @@ namespace SchedulingAPI.Controllers
             }
             try
             {
-                var createdRegistration = await service.RegisterStudents(registrationToClassDTO);
+                var createdRegistration = await registrationService.RegisterStudents(registrationToClassDTO);
                 return Created($"/api/registration/students", createdRegistration);
             }
             catch (Exception e)
@@ -59,7 +59,7 @@ namespace SchedulingAPI.Controllers
         {
             try
             {
-                return Ok(await service.DeleteRegistration(code, studentId));
+                return Ok(await registrationService.DeleteRegistration(code, studentId));
             }
             catch (Exception e)
             {

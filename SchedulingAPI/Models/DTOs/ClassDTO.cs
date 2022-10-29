@@ -15,6 +15,6 @@ namespace SchedulingAPI.Models.DTOs
         [StringLength(250, ErrorMessage = "Description length can't be more than 250.")]
         public string Description { get; set; }
 
-        public IEnumerable<Registration> Registrations { get; set; }
+        public IEnumerable<SimpleStudentDTO> simpleStudentsDTOs { get; set; }
     }
 }

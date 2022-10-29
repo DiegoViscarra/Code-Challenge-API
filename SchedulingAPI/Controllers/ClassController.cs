@@ -12,10 +12,52 @@ namespace SchedulingAPI.Controllers
     [ApiController]
     public class ClassController : ControllerBase
     {
-        private readonly IClassService service;
-        public ClassController(IClassService service)
+        private readonly IClassService classService;
+        public ClassController(IClassService classService)
         {
-            this.service = service;
+            this.classService = classService;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<SimpleClassDTO>> GetAllClasses()
+        {
+            try
+            {
+                var classes = await classService.GetAllClasses();
+                return Ok(classes);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
+        }
+
+        [HttpGet("{code}")]
+        public async Task<ActionResult<SimpleClassDTO>> GetClassByCode(int code)
+        {
+            try
+            {
+                var course = await classService.GetClassByCode(code);
+                return Ok(course);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
+        }
+
+        [HttpGet("{code}/students")]
+        public async Task<ActionResult<SimpleStudentDTO>> GetClassByCodeWithStudents(int code)
+        {
+            try
+            {
+                var course = await classService.GetClassByCodeWithStudents(code);
+                return Ok(course);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
         }
 
         [HttpPost]
@@ -27,7 +69,7 @@ namespace SchedulingAPI.Controllers
             }
             try
             {
-                var createdClass = await service.AddClass(simpleClassDTO);
+                var createdClass = await classService.AddClass(simpleClassDTO);
                 return Created($"/api/class/{createdClass.Code}", createdClass);
             }
             catch (Exception e)
@@ -36,8 +78,8 @@ namespace SchedulingAPI.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<SimpleClassDTO>> PutClass(int id, [FromBody] SimpleClassDTO simpleClassDTO)
+        [HttpPut("{code}")]
+        public async Task<ActionResult<SimpleClassDTO>> PutClass(int code, [FromBody] SimpleClassDTO simpleClassDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -45,7 +87,7 @@ namespace SchedulingAPI.Controllers
             }
             try
             {
-                var classUpdated = await service.UpdateClass(id, simpleClassDTO);
+                var classUpdated = await classService.UpdateClass(code, simpleClassDTO);
                 return Ok(classUpdated);
             }
             catch (Exception e)

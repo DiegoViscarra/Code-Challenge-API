@@ -22,6 +22,14 @@ namespace SchedulingAPI.Data.Repositories.RegistrationRepository
             return await query.SingleOrDefaultAsync(r => r.Code == code && r.StudentId == studentId);
         }
 
+        public async Task<IEnumerable<Registration>> GetRegistrationsByClassCode(int code)
+        {
+            IQueryable<Registration> query = dbContext.Registrations;
+            query = query.Where(q => q.Code == code);
+            query = query.AsNoTracking();
+            return await query.ToArrayAsync();
+        }
+
         public async Task<IEnumerable<Registration>> GetRegistrationsByStudentId(int studentId)
         {
             IQueryable<Registration> query = dbContext.Registrations;
