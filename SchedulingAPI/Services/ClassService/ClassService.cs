@@ -86,6 +86,15 @@ namespace SchedulingAPI.Services.ClassService
             throw new Exception("There was an error with the DB");
         }
 
+        public async Task<bool> DeleteClass(int code)
+        {
+            await ValidateClass(code);
+            await classRepository.DeleteClass(code);
+            if (await classRepository.SaveChangesAsync())
+                return true;
+            return false;
+        }
+
         private async Task<Class> ValidateClass(int code)
         {
             var course = await classRepository.GetClassByCode(code);

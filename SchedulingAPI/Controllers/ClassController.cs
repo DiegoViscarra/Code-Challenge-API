@@ -95,5 +95,18 @@ namespace SchedulingAPI.Controllers
                 throw new Exception("Error:", e);
             }
         }
+
+        [HttpDelete("{code}")]
+        public async Task<ActionResult<bool>> DeleteClass(int code)
+        {
+            try
+            {
+                return Ok(await classService.DeleteClass(code));
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
+        }
     }
 }

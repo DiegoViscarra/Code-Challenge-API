@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchedulingAPI.Data.Entities;
+using SchedulingAPI.Data.Repositories.RegistrationRepository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,11 @@ namespace SchedulingAPI.Data.Repositories.ClassRepository
     public class ClassRepository : IClassRepository
     {
         private SchedulingDbContext dbContext;
-        public ClassRepository(SchedulingDbContext dbContext)
+        private readonly IRegistrationRepository registrationRepository;
+        public ClassRepository(SchedulingDbContext dbContext, IRegistrationRepository registrationRepository)
         {
             this.dbContext = dbContext;
+            this.registrationRepository = registrationRepository;
         }
 
         public async Task<IEnumerable<Class>> GetAllClasses()
@@ -39,6 +42,22 @@ namespace SchedulingAPI.Data.Repositories.ClassRepository
             var classToUpdate = dbContext.Classes.Single(c => c.Code == code);
             classToUpdate.Title = course.Title;
             classToUpdate.Description = course.Description;
+        }
+
+        public async Task DeleteClass(int code)
+        {
+            var classToDelete = await dbContext.Classes.SingleAsync(c => c.Code == code);
+            await DeleteRegistrationsFromClass(code);
+            dbContext.Classes.Remove(classToDelete);
+        }
+
+        private async Task DeleteRegistrationsFromClass(int code)
+        {
+            var registrationsFromClass = dbContext.Registrations.Where(r => r.Code == code);
+            foreach (var registration in registrationsFromClass)
+            {
+                await registrationRepository.DeleteRegistration(registration.Code, registration.StudentId);
+            }
         }
 
         public async Task<bool> SaveChangesAsync()

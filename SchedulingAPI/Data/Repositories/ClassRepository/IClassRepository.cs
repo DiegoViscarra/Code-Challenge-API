@@ -12,6 +12,7 @@ namespace SchedulingAPI.Data.Repositories.ClassRepository
         Task<Class> GetClassByCode(int code);
         void AddClass(Class course);
         void UpdateClass(int code, Class course);
+        Task DeleteClass(int code);
         Task<bool> SaveChangesAsync();
         void DetachEntity<T>(T entity) where T : class;
     }

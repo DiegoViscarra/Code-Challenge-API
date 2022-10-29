@@ -51,7 +51,7 @@ namespace SchedulingAPI.Data.Repositories.StudentRepository
             dbContext.Students.Remove(studentToDelete);
         }
 
-        public async Task DeleteRegistrationsFromStudent(int studentId)
+        private async Task DeleteRegistrationsFromStudent(int studentId)
         {
             var registrationsFromStudent = dbContext.Registrations.Where(r => r.StudentId == studentId);
             foreach (var registration in registrationsFromStudent)
