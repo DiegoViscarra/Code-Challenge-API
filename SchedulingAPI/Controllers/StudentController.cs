@@ -46,6 +46,20 @@ namespace SchedulingAPI.Controllers
             }
         }
 
+        [HttpGet("{id}/classes")]
+        public async Task<ActionResult<SimpleStudentDTO>> GetStudentByIdWithClasses(int id)
+        {
+            try
+            {
+                var student = await studentService.GetStudentByIdWithClasses(id);
+                return Ok(student);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error:", e);
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult<SimpleStudentDTO>> PostStudent([FromBody] SimpleStudentDTO simpleStudentDTO)
         {
