@@ -103,7 +103,7 @@ namespace SchedulingAPI.Services.StudentService
 
         private async Task<Class> ValidateClass(int code)
         {
-            var course = await classRepository.GetClass(code);
+            var course = await classRepository.GetClassByCode(code);
             if (course == null)
                 throw new Exception("Class not found");
             return course;
