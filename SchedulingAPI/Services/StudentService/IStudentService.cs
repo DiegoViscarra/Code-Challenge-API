@@ -13,5 +13,6 @@ namespace SchedulingAPI.Services.StudentService
         Task<StudentDTO> GetStudentByIdWithClasses(int studentId);
         Task<SimpleStudentDTO> AddStudent(SimpleStudentDTO simpleStudentDTO);
         Task<SimpleStudentDTO> UpdateStudent(int studentId, SimpleStudentDTO simpleStudentDTO);
+        Task<bool> DeleteStudent(int studentId);
     }
 }

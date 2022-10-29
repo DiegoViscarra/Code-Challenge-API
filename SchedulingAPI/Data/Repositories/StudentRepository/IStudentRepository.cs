@@ -12,6 +12,7 @@ namespace SchedulingAPI.Data.Repositories.StudentRepository
         Task<Student> GetStudentById(int studentId);
         void AddStudent(Student student);
         void UpdateStudent(int studentId, Student student);
+        Task DeleteStudent(int studentId);
         Task<bool> SaveChangesAsync();
         void DetachEntity<T>(T entity) where T : class;
     }
