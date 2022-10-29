@@ -13,5 +13,6 @@ namespace SchedulingAPI.Services.ClassService
         Task<ClassDTO> GetClassByCodeWithStudents(int code);
         Task<SimpleClassDTO> AddClass(SimpleClassDTO simpleClassDTO);
         Task<SimpleClassDTO> UpdateClass(int code, SimpleClassDTO simpleClassDTO);
+        Task<bool> DeleteClass(int code);
     }
 }
