@@ -84,6 +84,15 @@ namespace SchedulingAPI.Services.StudentService
             throw new Exception("There was an error with the DB");
         }
 
+        public async Task<bool> DeleteStudent(int studentId)
+        {
+            await ValidateStudent(studentId);
+            await studentRepository.DeleteStudent(studentId);
+            if (await studentRepository.SaveChangesAsync())
+                return true;
+            return false;
+        }
+
         private async Task<Student> ValidateStudent(int studentId)
         {
             var student = await studentRepository.GetStudentById(studentId);
