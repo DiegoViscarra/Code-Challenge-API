@@ -1,4 +1,4 @@
-﻿using SchedulingAPI.Data.Entities;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,7 +7,7 @@ namespace SchedulingAPI.Models.DTOs
     public class ClassDTO
     {
         [Required]
-        public int Code { get; set; }
+        public Guid Code { get; set; }
         [Required]
         [StringLength(30, ErrorMessage = "Title length can't be more than 30.")]
         public string Title { get; set; }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SchedulingAPI.Data.Entities
@@ -7,7 +8,7 @@ namespace SchedulingAPI.Data.Entities
     {
         [Key]
         [Required]
-        public int Code { get; set; }
+        public Guid Code { get; set; }
         [Required]
         [Column(TypeName = "nvarchar(30)")]
         public string Title { get; set; }

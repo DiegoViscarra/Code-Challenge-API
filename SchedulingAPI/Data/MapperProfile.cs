@@ -8,11 +8,11 @@ namespace SchedulingAPI.Data
     {
         public MapperProfile()
         {
-            this.CreateMap<Class, ClassDTO>().ReverseMap();
-            this.CreateMap<Class, SimpleClassDTO>().ReverseMap();
-            this.CreateMap<Registration, RegistrationDTO>().ReverseMap();
-            this.CreateMap<Student, StudentDTO>().ReverseMap();
-            this.CreateMap<Student, SimpleStudentDTO>().ReverseMap();
+            CreateMap<Class, ClassDTO>().ReverseMap();
+            CreateMap<Class, SimpleClassDTO>().ReverseMap();
+            CreateMap<Registration, RegistrationDTO>().ReverseMap();
+            CreateMap<Student, StudentDTO>().ReverseMap();
+            CreateMap<Student, SimpleStudentDTO>().ReverseMap();
         }
     }
 }
