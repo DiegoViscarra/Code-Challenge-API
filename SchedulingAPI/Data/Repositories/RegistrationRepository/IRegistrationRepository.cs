@@ -1,18 +1,7 @@
 ﻿using SchedulingAPI.Data.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using SchedulingAPI.Data.Repositories.GenericRepository;
 
 namespace SchedulingAPI.Data.Repositories.RegistrationRepository
 {
-    public interface IRegistrationRepository
-    {
-        Task<Registration> GetRegistrationByIds(int code, int studentId);
-        Task<IEnumerable<Registration>> GetRegistrationsByClassCode(int code);
-        Task<IEnumerable<Registration>> GetRegistrationsByStudentId(int studentId);
-        void AddRegistration(List<Registration> registrations);
-        Task DeleteRegistration(int code, int studentId);
-        Task<bool> SaveChangesAsync();
-    }
+    public interface IRegistrationRepository : IGenericRepository<Registration> {}
 }

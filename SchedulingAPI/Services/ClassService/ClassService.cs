@@ -1,44 +1,44 @@
 ﻿using AutoMapper;
 using SchedulingAPI.Data.Entities;
-using SchedulingAPI.Data.Repositories.ClassRepository;
-using SchedulingAPI.Data.Repositories.RegistrationRepository;
-using SchedulingAPI.Data.Repositories.StudentRepository;
+using SchedulingAPI.Data.UnitOfWork;
 using SchedulingAPI.Models.DTOs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SchedulingAPI.Services.ClassService
 {
     public class ClassService : IClassService
     {
-        private readonly IClassRepository classRepository;
-        private readonly IRegistrationRepository registrationRepository;
-        private readonly IStudentRepository studentRepository;
+        private readonly IUnitOfWork uow;
         private readonly IMapper mapper;
-        public ClassService(IClassRepository classRepository, IRegistrationRepository registrationRepository, IStudentRepository studentRepository, IMapper mapper)
+        public ClassService(IUnitOfWork uow, IMapper mapper)
         {
-            this.classRepository = classRepository;
-            this.registrationRepository = registrationRepository;
-            this.studentRepository = studentRepository;
+            this.uow = uow;
             this.mapper = mapper;
         }
 
         public async Task<IEnumerable<SimpleClassDTO>> GetAllClasses()
         {
-            var classes = await classRepository.GetAllClasses();
+            var classes = await uow.ClassRepository.GetAllAsync();
             var SimpleClassesDTOs = mapper.Map<IEnumerable<SimpleClassDTO>>(classes);
             return SimpleClassesDTOs;
         }
 
-        public async Task<ClassDTO> GetClassByCodeWithStudents(int code)
+        public async Task<SimpleClassDTO> GetClassByCode(Guid code)
+        {
+            var course = await ValidateClass(code);
+            var simpleClassDTO = mapper.Map<SimpleClassDTO>(course);
+            return simpleClassDTO;
+        }
+
+        public async Task<ClassDTO> GetClassByCodeWithStudents(Guid code)
         {
             var course = await ValidateClass(code);
             var classDTO = mapper.Map<ClassDTO>(course);
-            var registrations = await registrationRepository.GetRegistrationsByClassCode(code);
+            var registrations = await uow.RegistrationRepository.GetAllByConditionAsync(r => r.Code == code);
             if (registrations == null)
-                throw new Exception("Class registrations not found");
+                throw new Exception($"Class {course.Title} registrations not found");
             IEnumerable<RegistrationDTO> registrationsDTOs = mapper.Map<IEnumerable<RegistrationDTO>>(registrations);
             List<SimpleStudentDTO> simpleStudentsDTOs = new List<SimpleStudentDTO>();
             foreach (var registrationDTO in registrationsDTOs)
@@ -51,61 +51,62 @@ namespace SchedulingAPI.Services.ClassService
             return classDTO;
         }
 
-        public async Task<SimpleClassDTO> GetClassByCode(int code)
-        {
-            var course = await ValidateClass(code);
-            var simpleClassDTO = mapper.Map<SimpleClassDTO>(course);
-            return simpleClassDTO;
-        }
-
         public async Task<SimpleClassDTO> AddClass(SimpleClassDTO simpleClassDTO)
         {
+            simpleClassDTO.Code = new Guid();
             var course = mapper.Map<Class>(simpleClassDTO);
-            classRepository.AddClass(course);
-            if (await classRepository.SaveChangesAsync())
+            var createdClass = await uow.ClassRepository.AddOneAsync(course);
+            if (createdClass != null)
                 return mapper.Map<SimpleClassDTO>(course);
-            throw new Exception("Class was not added");
+            throw new Exception($"Class {course.Title} was not added");
         }
 
-        public async Task<SimpleClassDTO> UpdateClass(int code, SimpleClassDTO simpleClassDTO)
+        public async Task<SimpleClassDTO> UpdateClass(Guid code, SimpleClassDTO simpleClassDTO)
         {
-            var classToUpdate = await classRepository.GetClassByCode(code);
-            if (classToUpdate == null)
-                throw new Exception("Class not found");
-            if (simpleClassDTO.Code != 0 && simpleClassDTO.Code != code)
-                throw new Exception("Path Id and Body Id have to be the same");
+            var classToUpdate = await ValidateClass(code);
+            if (simpleClassDTO.Code != null && simpleClassDTO.Code != code)
+                throw new Exception("Path Code and Body Code have to be the same");
             if (simpleClassDTO.Title == null)
                 simpleClassDTO.Title = classToUpdate.Title;
             if (simpleClassDTO.Description == null)
                 simpleClassDTO.Description = classToUpdate.Description;
-            classRepository.DetachEntity(classToUpdate);
             var course = mapper.Map<Class>(simpleClassDTO);
-            classRepository.UpdateClass(code, course);
-            if (await classRepository.SaveChangesAsync())
+            var classUpdated = await uow.ClassRepository.UpdateAsync(course);
+            if (classUpdated != null)
                 return mapper.Map<SimpleClassDTO>(course);
             throw new Exception("There was an error with the DB");
         }
 
-        public async Task<bool> DeleteClass(int code)
+        public async Task<bool> DeleteClass(Guid code)
         {
-            await ValidateClass(code);
-            await classRepository.DeleteClass(code);
-            if (await classRepository.SaveChangesAsync())
-                return true;
-            return false;
+            var course = await ValidateClass(code);
+            IEnumerable<Registration> registrationsOfClass = await uow.RegistrationRepository.GetAllByConditionAsync(r => r.Code == code);
+            List<Registration> ListRegistrationsOfClass = new List<Registration>(registrationsOfClass);
+            bool registrationsOfClassDeleted = await uow.RegistrationRepository.DeleteAllAsync(ListRegistrationsOfClass);
+            if (registrationsOfClassDeleted)
+            {
+                bool courseDeleted = await uow.ClassRepository.DeleteOneAsync(course);
+                if (courseDeleted)
+                    return courseDeleted;
+                throw new Exception($"There was an error deleting the class {course.Title}");
+            }
+            else
+            {
+                throw new Exception($"There was an error deleting the registrations of the class {course.Title}");
+            }
         }
 
-        private async Task<Class> ValidateClass(int code)
+        private async Task<Class> ValidateClass(Guid code)
         {
-            var course = await classRepository.GetClassByCode(code);
+            var course = await uow.ClassRepository.GetOneByConditionAsync(c => c.Code == code);
             if (course == null)
                 throw new Exception("Class not found");
             return course;
         }
 
-        private async Task<Student> ValidateStudent(int studentId)
+        private async Task<Student> ValidateStudent(Guid studentId)
         {
-            var student = await studentRepository.GetStudentById(studentId);
+            var student = await uow.StudentRepository.GetOneByConditionAsync(s => s.StudentId == studentId);
             if (student == null)
                 throw new Exception("Student not found");
             return student;
