@@ -2,8 +2,6 @@
 using SchedulingAPI.Models.DTOs;
 using SchedulingAPI.Services.StudentService;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SchedulingAPI.Controllers
@@ -32,12 +30,12 @@ namespace SchedulingAPI.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<SimpleStudentDTO>> GetStudentById(int id)
+        [HttpGet("{studentId}")]
+        public async Task<ActionResult<SimpleStudentDTO>> GetStudentById(Guid studentId)
         {
             try
             {
-                var student = await studentService.GetStudentById(id);
+                var student = await studentService.GetStudentById(studentId);
                 return Ok(student);
             }
             catch (Exception e)
@@ -46,12 +44,12 @@ namespace SchedulingAPI.Controllers
             }
         }
 
-        [HttpGet("{id}/classes")]
-        public async Task<ActionResult<SimpleStudentDTO>> GetStudentByIdWithClasses(int id)
+        [HttpGet("{studentId}/classes")]
+        public async Task<ActionResult<SimpleStudentDTO>> GetStudentByIdWithClasses(Guid studentId)
         {
             try
             {
-                var student = await studentService.GetStudentByIdWithClasses(id);
+                var student = await studentService.GetStudentByIdWithClasses(studentId);
                 return Ok(student);
             }
             catch (Exception e)
@@ -78,8 +76,8 @@ namespace SchedulingAPI.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<SimpleStudentDTO>> PutStudent(int id, [FromBody] SimpleStudentDTO simpleStudentDTO)
+        [HttpPut("{studentId}")]
+        public async Task<ActionResult<SimpleStudentDTO>> PutStudent(Guid studentId, [FromBody] SimpleStudentDTO simpleStudentDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -87,7 +85,7 @@ namespace SchedulingAPI.Controllers
             }
             try
             {
-                var studentUpdated = await studentService.UpdateStudent(id, simpleStudentDTO);
+                var studentUpdated = await studentService.UpdateStudent(studentId, simpleStudentDTO);
                 return Ok(studentUpdated);
             }
             catch (Exception e)
@@ -96,12 +94,12 @@ namespace SchedulingAPI.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteStudent(int id)
+        [HttpDelete("{studentId}")]
+        public async Task<ActionResult<bool>> DeleteStudent(Guid studentId)
         {
             try
             {
-                return Ok(await studentService.DeleteStudent(id));
+                return Ok(await studentService.DeleteStudent(studentId));
             }
             catch (Exception e)
             {

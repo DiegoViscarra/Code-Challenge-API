@@ -1,44 +1,44 @@
 ﻿using AutoMapper;
 using SchedulingAPI.Data.Entities;
-using SchedulingAPI.Data.Repositories.ClassRepository;
-using SchedulingAPI.Data.Repositories.RegistrationRepository;
-using SchedulingAPI.Data.Repositories.StudentRepository;
+using SchedulingAPI.Data.UnitOfWork;
 using SchedulingAPI.Models.DTOs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SchedulingAPI.Services.StudentService
 {
     public class StudentService : IStudentService
     {
-        private readonly IStudentRepository studentRepository;
-        private readonly IClassRepository classRepository;
-        private readonly IRegistrationRepository registrationRepository;
+        private readonly IUnitOfWork uow;
         private readonly IMapper mapper;
-        public StudentService(IStudentRepository studentRepository, IRegistrationRepository registrationRepository, IClassRepository classRepository, IMapper mapper)
+        public StudentService(IUnitOfWork uow, IMapper mapper)
         {
-            this.studentRepository = studentRepository;
-            this.classRepository = classRepository;
-            this.registrationRepository = registrationRepository;
+            this.uow = uow;
             this.mapper = mapper;
         }
 
         public async Task<IEnumerable<SimpleStudentDTO>> GetAllStudents()
         {
-            var students = await studentRepository.GetAllStudents();
+            var students = await uow.StudentRepository.GetAllAsync();
             var simpleStudentDTOs = mapper.Map<IEnumerable<SimpleStudentDTO>>(students);
             return simpleStudentDTOs;
         }
 
-        public async Task<StudentDTO> GetStudentByIdWithClasses(int studentId)
+        public async Task<SimpleStudentDTO> GetStudentById(Guid studentId)
+        {
+            var student = await ValidateStudent(studentId);
+            var simpleStudentDTO = mapper.Map<SimpleStudentDTO>(student);
+            return simpleStudentDTO;
+        }
+
+        public async Task<StudentDTO> GetStudentByIdWithClasses(Guid studentId)
         {
             var student = await ValidateStudent(studentId);
             var studentDTO = mapper.Map<StudentDTO>(student);
-            var registrations = await registrationRepository.GetRegistrationsByStudentId(studentId);
+            var registrations = await uow.RegistrationRepository.GetAllByConditionAsync(r => r.StudentId == studentId);
             if (registrations == null)
-                throw new Exception("Student registrations not found");
+                throw new Exception($"Student {student.FirstName} registrations not found");
             IEnumerable<RegistrationDTO> registrationsDTOs = mapper.Map<IEnumerable<RegistrationDTO>>(registrations);
             List<SimpleClassDTO> simpleClassesDTOs = new List<SimpleClassDTO>();
             foreach (var registrationDTO in registrationsDTOs)
@@ -51,59 +51,63 @@ namespace SchedulingAPI.Services.StudentService
             return studentDTO;
         }
 
-        public async Task<SimpleStudentDTO> GetStudentById(int studentId)
-        {
-            var student = await ValidateStudent(studentId);
-            var simpleStudentDTO = mapper.Map<SimpleStudentDTO>(student);
-            return simpleStudentDTO;
-        }
 
         public async Task<SimpleStudentDTO> AddStudent(SimpleStudentDTO simpleStudentDTO)
         {
+            simpleStudentDTO.StudentId = new Guid();
             var student = mapper.Map<Student>(simpleStudentDTO);
-            studentRepository.AddStudent(student);
-            if (await studentRepository.SaveChangesAsync())
+            var createdStudent = await uow.StudentRepository.AddOneAsync(student);
+            if (createdStudent  != null)
                 return mapper.Map<SimpleStudentDTO>(student);
-            throw new Exception("Student was not added");
+            throw new Exception($"Student {student.FirstName} was not added");
         }
 
-        public async Task<SimpleStudentDTO> UpdateStudent(int studentId, SimpleStudentDTO simpleStudentDTO)
+        public async Task<SimpleStudentDTO> UpdateStudent(Guid studentId, SimpleStudentDTO simpleStudentDTO)
         {
             var studentToUpdate = await ValidateStudent(studentId);
-            if (simpleStudentDTO.StudentId != 0 && simpleStudentDTO.StudentId != studentId)
+            if (simpleStudentDTO.StudentId != null && simpleStudentDTO.StudentId != studentId)
                 throw new Exception("Path Id and Body Id have to be the same");
             if (simpleStudentDTO.FirstName == null)
                 simpleStudentDTO.FirstName = studentToUpdate.FirstName;
             if (simpleStudentDTO.LastName == null)
                 simpleStudentDTO.LastName = studentToUpdate.LastName;
-            studentRepository.DetachEntity(studentToUpdate);
             var student = mapper.Map<Student>(simpleStudentDTO);
-            studentRepository.UpdateStudent(studentId, student);
-            if (await studentRepository.SaveChangesAsync())
+            var studentUpdated = await uow.StudentRepository.UpdateAsync(student);
+            if (studentUpdated != null)
                 return mapper.Map<SimpleStudentDTO>(student);
             throw new Exception("There was an error with the DB");
         }
 
-        public async Task<bool> DeleteStudent(int studentId)
+        public async Task<bool> DeleteStudent(Guid studentId)
         {
-            await ValidateStudent(studentId);
-            await studentRepository.DeleteStudent(studentId);
-            if (await studentRepository.SaveChangesAsync())
-                return true;
-            return false;
+            var student = await ValidateStudent(studentId);
+            IEnumerable<Registration> registrationsOfStudent = await uow.RegistrationRepository.GetAllByConditionAsync(r => r.StudentId == studentId);
+            List<Registration> ListRegistrationsOfStudent = new List<Registration>(registrationsOfStudent);
+            bool registrationsOfStudentDeleted = await uow.RegistrationRepository.DeleteAllAsync(ListRegistrationsOfStudent);
+            if (registrationsOfStudentDeleted)
+            {
+                bool studentDeleted = await uow.StudentRepository.DeleteOneAsync(student);
+                if (studentDeleted)
+                    return studentDeleted;
+                throw new Exception($"There was an error deleting the student {student.FirstName}");
+            }
+            else
+            {
+                throw new Exception($"There was an error deleting the registrations of the student {student.FirstName}");
+            }
         }
 
-        private async Task<Student> ValidateStudent(int studentId)
+        private async Task<Student> ValidateStudent(Guid studentId)
         {
-            var student = await studentRepository.GetStudentById(studentId);
+            var student = await uow.StudentRepository.GetOneByConditionAsync(s => s.StudentId == studentId);
             if (student == null)
                 throw new Exception("Student not found");
             return student;
         }
 
-        private async Task<Class> ValidateClass(int code)
+        private async Task<Class> ValidateClass(Guid code)
         {
-            var course = await classRepository.GetClassByCode(code);
+            var course = await uow.ClassRepository.GetOneByConditionAsync(c => c.Code == code);
             if (course == null)
                 throw new Exception("Class not found");
             return course;

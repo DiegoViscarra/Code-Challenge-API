@@ -2,8 +2,6 @@
 using SchedulingAPI.Models.DTOs;
 using SchedulingAPI.Services.ClassService;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SchedulingAPI.Controllers
@@ -33,7 +31,7 @@ namespace SchedulingAPI.Controllers
         }
 
         [HttpGet("{code}")]
-        public async Task<ActionResult<SimpleClassDTO>> GetClassByCode(int code)
+        public async Task<ActionResult<SimpleClassDTO>> GetClassByCode(Guid code)
         {
             try
             {
@@ -47,7 +45,7 @@ namespace SchedulingAPI.Controllers
         }
 
         [HttpGet("{code}/students")]
-        public async Task<ActionResult<SimpleStudentDTO>> GetClassByCodeWithStudents(int code)
+        public async Task<ActionResult<SimpleStudentDTO>> GetClassByCodeWithStudents(Guid code)
         {
             try
             {
@@ -79,7 +77,7 @@ namespace SchedulingAPI.Controllers
         }
 
         [HttpPut("{code}")]
-        public async Task<ActionResult<SimpleClassDTO>> PutClass(int code, [FromBody] SimpleClassDTO simpleClassDTO)
+        public async Task<ActionResult<SimpleClassDTO>> PutClass(Guid code, [FromBody] SimpleClassDTO simpleClassDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -97,7 +95,7 @@ namespace SchedulingAPI.Controllers
         }
 
         [HttpDelete("{code}")]
-        public async Task<ActionResult<bool>> DeleteClass(int code)
+        public async Task<ActionResult<bool>> DeleteClass(Guid code)
         {
             try
             {

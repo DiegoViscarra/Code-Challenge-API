@@ -1,27 +1,20 @@
 ﻿using AutoMapper;
 using SchedulingAPI.Data.Entities;
-using SchedulingAPI.Data.Repositories.ClassRepository;
-using SchedulingAPI.Data.Repositories.RegistrationRepository;
-using SchedulingAPI.Data.Repositories.StudentRepository;
+using SchedulingAPI.Data.UnitOfWork;
 using SchedulingAPI.Models.DTOs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SchedulingAPI.Services.RegistrationService
 {
     public class RegistrationService : IRegistrationService
     {
-        private readonly IRegistrationRepository registrationRepository;
-        private readonly IClassRepository classRepository;
-        private readonly IStudentRepository studentRepository;
+        private readonly IUnitOfWork uow;
         private readonly IMapper mapper;
-        public RegistrationService(IRegistrationRepository registrationRepository, IClassRepository classRepository, IStudentRepository studentRepository, IMapper mapper)
+        public RegistrationService(IUnitOfWork uow, IMapper mapper)
         {
-            this.registrationRepository = registrationRepository;
-            this.classRepository = classRepository;
-            this.studentRepository = studentRepository;
+            this.uow = uow;
             this.mapper = mapper;
         }
 
@@ -41,8 +34,8 @@ namespace SchedulingAPI.Services.RegistrationService
                     registrationsDTOs.Add(registrationDTO);
                 }
                 var registrations = mapper.Map<List<Registration>>(registrationsDTOs);
-                registrationRepository.AddRegistration(registrations);
-                if (await registrationRepository.SaveChangesAsync())
+                var createdRegistrations = await uow.RegistrationRepository.AddAllAsync(registrations);
+                if (createdRegistrations != null)
                     return registrationToStudentDTO;
                 throw new Exception("Classes were not registered");
             }
@@ -59,9 +52,9 @@ namespace SchedulingAPI.Services.RegistrationService
             return true;
         }
 
-        private async Task ValidateNotDoubleRegistration(int code, int studentId)
+        private async Task ValidateNotDoubleRegistration(Guid code, Guid studentId)
         {
-            var course = await registrationRepository.GetRegistrationByIds(code, studentId);
+            var course = await uow.RegistrationRepository.GetOneByConditionAsync(r => r.Code == code && r.StudentId == studentId);
             if (course != null)
                 throw new Exception("The student is already registered to the class");
         }
@@ -82,8 +75,8 @@ namespace SchedulingAPI.Services.RegistrationService
                     registrationsDTOs.Add(registrationDTO);
                 }
                 var registrations = mapper.Map<List<Registration>>(registrationsDTOs);
-                registrationRepository.AddRegistration(registrations);
-                if (await registrationRepository.SaveChangesAsync())
+                var createdRegistrations = await uow.RegistrationRepository.AddAllAsync(registrations);
+                if (createdRegistrations != null)
                     return registrationToClassDTO;
                 throw new Exception("Students were not registered");
             }
@@ -100,36 +93,37 @@ namespace SchedulingAPI.Services.RegistrationService
             return true;
         }
 
-        public async Task<bool> DeleteRegistration(int code, int studentId)
+        public async Task<bool> DeleteRegistration(Guid code, Guid studentId)
         {
             await ValidateClass(code);
             await ValidateStudent(studentId);
-            await ValidateRegistration(code, studentId);
-            await registrationRepository.DeleteRegistration(code, studentId);
-            if (await registrationRepository.SaveChangesAsync())
+            var registration = await ValidateRegistration(code, studentId);
+            bool registrationDeleted = await uow.RegistrationRepository.DeleteOneAsync(registration);
+            if (registrationDeleted)
                 return true;
-            return false;
+            throw new Exception("There was an error deleting the student from the class");
         }
 
-        private async Task ValidateClass(int code)
+        private async Task ValidateClass(Guid code)
         {
-            var course = await classRepository.GetClassByCode(code);
+            var course = await uow.ClassRepository.GetOneByConditionAsync(c => c.Code == code);
             if (course == null)
                 throw new Exception("Class not found");
         }
 
-        private async Task ValidateStudent(int studentId)
+        private async Task ValidateStudent(Guid studentId)
         {
-            var student = await studentRepository.GetStudentById(studentId);
+            var student = await uow.StudentRepository.GetOneByConditionAsync(s => s.StudentId == studentId);
             if (student == null)
                 throw new Exception("Student not found");
         }
 
-        private async Task ValidateRegistration(int code, int studentId)
+        private async Task<Registration> ValidateRegistration(Guid code, Guid studentId)
         {
-            var registration = await registrationRepository.GetRegistrationByIds(code, studentId);
+            var registration = await uow.RegistrationRepository.GetOneByConditionAsync(r => r.Code == code && r.StudentId == studentId);
             if (registration == null)
                 throw new Exception("Registration not found");
+            return registration;
         }
     }
 }

@@ -13,10 +13,8 @@ namespace SchedulingAPI.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Class>().ToTable("Classes");
-            modelBuilder.Entity<Class>().Property(c => c.Code).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Student>().ToTable("Students");
-            modelBuilder.Entity<Student>().Property(s => s.StudentId).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Registration>().ToTable("Registrations");
             modelBuilder.Entity<Registration>().HasKey(r => new { r.Code, r.StudentId });

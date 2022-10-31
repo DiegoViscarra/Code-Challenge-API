@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace SchedulingAPI.Models.DTOs
 {
     public class SimpleStudentDTO
     {
-        [Required]
-        public int StudentId { get; set; }
+        public Guid StudentId { get; set; }
         [Required]
         [StringLength(20, ErrorMessage = "First name length can't be more than 20.")]
         public string FirstName { get; set; }

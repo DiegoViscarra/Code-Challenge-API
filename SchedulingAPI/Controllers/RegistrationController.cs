@@ -2,8 +2,6 @@
 using SchedulingAPI.Models.DTOs;
 using SchedulingAPI.Services.RegistrationService;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SchedulingAPI.Controllers
@@ -55,7 +53,7 @@ namespace SchedulingAPI.Controllers
         }
 
         [HttpDelete("{code}/class/{studentId}/student")]
-        public async Task<ActionResult<bool>> Delete(int code, int studentId)
+        public async Task<ActionResult<bool>> Delete(Guid code, Guid studentId)
         {
             try
             {
