@@ -11,6 +11,7 @@ using SchedulingAPI.Data.Repositories.ClassRepository;
 using SchedulingAPI.Data.Repositories.RegistrationRepository;
 using SchedulingAPI.Data.Repositories.StudentRepository;
 using SchedulingAPI.Data.UnitOfWork;
+using SchedulingAPI.Middleware;
 using SchedulingAPI.Services.ClassService;
 using SchedulingAPI.Services.RegistrationService;
 using SchedulingAPI.Services.StudentService;
@@ -70,6 +71,8 @@ namespace SchedulingAPI
                 options.AllowAnyMethod();
                 options.AllowAnyHeader();
             });
+
+            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseRouting();
 
