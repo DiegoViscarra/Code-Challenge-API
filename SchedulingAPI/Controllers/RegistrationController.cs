@@ -23,15 +23,8 @@ namespace SchedulingAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var createdRegistration = await registrationService.RegisterClasses(registrationToStudentDTO);
-                return Created($"/api/registration/classes", createdRegistration);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var createdRegistration = await registrationService.RegisterClasses(registrationToStudentDTO);
+            return Created($"/api/registration/classes", createdRegistration);
         }
 
         [HttpPost("students")]
@@ -41,28 +34,14 @@ namespace SchedulingAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var createdRegistration = await registrationService.RegisterStudents(registrationToClassDTO);
-                return Created($"/api/registration/students", createdRegistration);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var createdRegistration = await registrationService.RegisterStudents(registrationToClassDTO);
+            return Created($"/api/registration/students", createdRegistration);
         }
 
         [HttpDelete("{code}/class/{studentId}/student")]
         public async Task<ActionResult<bool>> Delete(Guid code, Guid studentId)
         {
-            try
-            {
-                return Ok(await registrationService.DeleteRegistration(code, studentId));
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            return Ok(await registrationService.DeleteRegistration(code, studentId));
         }
     }
 }

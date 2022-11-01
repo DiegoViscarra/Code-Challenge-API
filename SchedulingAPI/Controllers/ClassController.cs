@@ -19,43 +19,22 @@ namespace SchedulingAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<SimpleClassDTO>> GetAllClasses()
         {
-            try
-            {
-                var classes = await classService.GetAllClasses();
-                return Ok(classes);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var classes = await classService.GetAllClasses();
+            return Ok(classes);
         }
 
         [HttpGet("{code}")]
         public async Task<ActionResult<SimpleClassDTO>> GetClassByCode(Guid code)
         {
-            try
-            {
-                var course = await classService.GetClassByCode(code);
-                return Ok(course);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var course = await classService.GetClassByCode(code);
+            return Ok(course);
         }
 
         [HttpGet("{code}/students")]
         public async Task<ActionResult<SimpleStudentDTO>> GetClassByCodeWithStudents(Guid code)
         {
-            try
-            {
-                var course = await classService.GetClassByCodeWithStudents(code);
-                return Ok(course);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var course = await classService.GetClassByCodeWithStudents(code);
+            return Ok(course);
         }
 
         [HttpPost]
@@ -65,15 +44,8 @@ namespace SchedulingAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var createdClass = await classService.AddClass(simpleClassDTO);
-                return Created($"/api/class/{createdClass.Code}", createdClass);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var createdClass = await classService.AddClass(simpleClassDTO);
+            return Created($"/api/class/{createdClass.Code}", createdClass);
         }
 
         [HttpPut("{code}")]
@@ -83,28 +55,14 @@ namespace SchedulingAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var classUpdated = await classService.UpdateClass(code, simpleClassDTO);
-                return Ok(classUpdated);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var classUpdated = await classService.UpdateClass(code, simpleClassDTO);
+            return Ok(classUpdated);
         }
 
         [HttpDelete("{code}")]
         public async Task<ActionResult<bool>> DeleteClass(Guid code)
         {
-            try
-            {
-                return Ok(await classService.DeleteClass(code));
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            return Ok(await classService.DeleteClass(code));
         }
     }
 }

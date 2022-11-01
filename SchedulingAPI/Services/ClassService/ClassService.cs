@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SchedulingAPI.Data.Entities;
 using SchedulingAPI.Data.UnitOfWork;
+using SchedulingAPI.Exceptions;
 using SchedulingAPI.Models.DTOs;
 using System;
 using System.Collections.Generic;
@@ -20,76 +21,118 @@ namespace SchedulingAPI.Services.ClassService
 
         public async Task<IEnumerable<SimpleClassDTO>> GetAllClasses()
         {
-            var classes = await uow.ClassRepository.GetAllAsync();
-            var SimpleClassesDTOs = mapper.Map<IEnumerable<SimpleClassDTO>>(classes);
-            return SimpleClassesDTOs;
+            try
+            {
+                var classes = await uow.ClassRepository.GetAllAsync();
+                var SimpleClassesDTOs = mapper.Map<IEnumerable<SimpleClassDTO>>(classes);
+                return SimpleClassesDTOs;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e.InnerException);
+            }
         }
 
         public async Task<SimpleClassDTO> GetClassByCode(Guid code)
         {
-            var course = await ValidateClass(code);
-            var simpleClassDTO = mapper.Map<SimpleClassDTO>(course);
-            return simpleClassDTO;
+            try
+            {
+                var course = await ValidateClass(code);
+                var simpleClassDTO = mapper.Map<SimpleClassDTO>(course);
+                return simpleClassDTO;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e.InnerException);
+            }
         }
 
         public async Task<ClassDTO> GetClassByCodeWithStudents(Guid code)
         {
-            var course = await ValidateClass(code);
-            var classDTO = mapper.Map<ClassDTO>(course);
-            var registrations = await uow.RegistrationRepository.GetAllByConditionAsync(r => r.Code == code);
-            if (registrations == null)
-                throw new Exception($"Class {course.Title} registrations not found");
-            IEnumerable<RegistrationDTO> registrationsDTOs = mapper.Map<IEnumerable<RegistrationDTO>>(registrations);
-            List<SimpleStudentDTO> simpleStudentsDTOs = new List<SimpleStudentDTO>();
-            foreach (var registrationDTO in registrationsDTOs)
+            try
             {
-                var student = await ValidateStudent(registrationDTO.StudentId);
-                var simpleStudentDTO = mapper.Map<SimpleStudentDTO>(student);
-                simpleStudentsDTOs.Add(simpleStudentDTO);
+                var course = await ValidateClass(code);
+                var classDTO = mapper.Map<ClassDTO>(course);
+                var registrations = await uow.RegistrationRepository.GetAllByConditionAsync(r => r.Code == code);
+                if (registrations == null)
+                    throw new NotFoundItemException($"Class {course.Title} registrations not found");
+                IEnumerable<RegistrationDTO> registrationsDTOs = mapper.Map<IEnumerable<RegistrationDTO>>(registrations);
+                List<SimpleStudentDTO> simpleStudentsDTOs = new List<SimpleStudentDTO>();
+                foreach (var registrationDTO in registrationsDTOs)
+                {
+                    var student = await ValidateStudent(registrationDTO.StudentId);
+                    var simpleStudentDTO = mapper.Map<SimpleStudentDTO>(student);
+                    simpleStudentsDTOs.Add(simpleStudentDTO);
+                }
+                classDTO.simpleStudentsDTOs = simpleStudentsDTOs;
+                return classDTO;
             }
-            classDTO.simpleStudentsDTOs = simpleStudentsDTOs;
-            return classDTO;
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e.InnerException);
+            }
         }
 
         public async Task<SimpleClassDTO> AddClass(SimpleClassDTO simpleClassDTO)
         {
-            simpleClassDTO.Code = new Guid();
-            var course = mapper.Map<Class>(simpleClassDTO);
-            var createdClass = await uow.ClassRepository.AddOneAsync(course);
-            if (createdClass != null)
-                return mapper.Map<SimpleClassDTO>(course);
-            throw new Exception($"Class {course.Title} was not added");
+            try
+            {
+                simpleClassDTO.Code = new Guid();
+                var course = mapper.Map<Class>(simpleClassDTO);
+                var createdClass = await uow.ClassRepository.AddOneAsync(course);
+                if (createdClass != null)
+                    return mapper.Map<SimpleClassDTO>(course);
+                throw new DatabaseException($"Class {course.Title} was not added");
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e.InnerException);
+            }
         }
 
         public async Task<SimpleClassDTO> UpdateClass(Guid code, SimpleClassDTO simpleClassDTO)
         {
-            var classToUpdate = await ValidateClass(code);
-            if (simpleClassDTO.Code != null && simpleClassDTO.Code != code)
-                throw new Exception("Path Code and Body Code have to be the same");
-            classToUpdate.Title = simpleClassDTO.Title;
-            classToUpdate.Description = simpleClassDTO.Description;
-            var classUpdated = await uow.ClassRepository.UpdateAsync(classToUpdate);
-            if (classUpdated != null)
-                return mapper.Map<SimpleClassDTO>(classUpdated);
-            throw new Exception("There was an error with the DB");
+            try
+            {
+                var classToUpdate = await ValidateClass(code);
+                if (simpleClassDTO.Code != null && simpleClassDTO.Code != code)
+                    throw new AppException("Path Code and Body Code have to be the same");
+                classToUpdate.Title = simpleClassDTO.Title;
+                classToUpdate.Description = simpleClassDTO.Description;
+                var classUpdated = await uow.ClassRepository.UpdateAsync(classToUpdate);
+                if (classUpdated != null)
+                    return mapper.Map<SimpleClassDTO>(classUpdated);
+                throw new DatabaseException("There was an error while updating the class");
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e.InnerException);
+            }
         }
 
         public async Task<bool> DeleteClass(Guid code)
         {
-            var course = await ValidateClass(code);
-            IEnumerable<Registration> registrationsOfClass = await uow.RegistrationRepository.GetAllByConditionAsync(r => r.Code == code);
-            List<Registration> ListRegistrationsOfClass = new List<Registration>(registrationsOfClass);
-            bool registrationsOfClassDeleted = await uow.RegistrationRepository.DeleteAllAsync(ListRegistrationsOfClass);
-            if (registrationsOfClassDeleted)
+            try
             {
-                bool courseDeleted = await uow.ClassRepository.DeleteOneAsync(course);
-                if (courseDeleted)
-                    return courseDeleted;
-                throw new Exception($"There was an error deleting the class {course.Title}");
+                var course = await ValidateClass(code);
+                IEnumerable<Registration> registrationsOfClass = await uow.RegistrationRepository.GetAllByConditionAsync(r => r.Code == code);
+                List<Registration> ListRegistrationsOfClass = new List<Registration>(registrationsOfClass);
+                bool registrationsOfClassDeleted = await uow.RegistrationRepository.DeleteAllAsync(ListRegistrationsOfClass);
+                if (registrationsOfClassDeleted)
+                {
+                    bool courseDeleted = await uow.ClassRepository.DeleteOneAsync(course);
+                    if (courseDeleted)
+                        return courseDeleted;
+                    throw new DatabaseException($"There was an error while deleting the class {course.Title}");
+                }
+                else
+                {
+                    throw new DatabaseException($"There was an error while deleting the registrations of the class {course.Title}");
+                }
             }
-            else
+            catch (Exception e)
             {
-                throw new Exception($"There was an error deleting the registrations of the class {course.Title}");
+                throw new Exception(e.Message, e.InnerException);
             }
         }
 
@@ -97,7 +140,7 @@ namespace SchedulingAPI.Services.ClassService
         {
             var course = await uow.ClassRepository.GetOneByConditionAsync(c => c.Code == code);
             if (course == null)
-                throw new Exception("Class not found");
+                throw new NotFoundItemException($"Class with code {code} not found");
             return course;
         }
 
@@ -105,7 +148,7 @@ namespace SchedulingAPI.Services.ClassService
         {
             var student = await uow.StudentRepository.GetOneByConditionAsync(s => s.StudentId == studentId);
             if (student == null)
-                throw new Exception("Student not found");
+                throw new NotFoundItemException($"Student with studentId {studentId} not found");
             return student;
         }
     }
