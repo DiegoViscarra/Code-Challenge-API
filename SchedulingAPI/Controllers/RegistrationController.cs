@@ -16,7 +16,7 @@ namespace SchedulingAPI.Controllers
             this.registrationService = registrationService;
         }
 
-        [HttpPost("/classes")]
+        [HttpPost("classes")]
         public async Task<ActionResult<RegistrationToClassDTO>> PostRegistrationClasses([FromBody] RegistrationToStudentDTO registrationToStudentDTO)
         {
             if (!ModelState.IsValid)
@@ -34,7 +34,7 @@ namespace SchedulingAPI.Controllers
             }
         }
 
-        [HttpPost("/students")]
+        [HttpPost("students")]
         public async Task<ActionResult<RegistrationToClassDTO>> PostRegistrationStudents([FromBody] RegistrationToClassDTO registrationToClassDTO)
         {
             if (!ModelState.IsValid)

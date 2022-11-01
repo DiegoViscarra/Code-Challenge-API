@@ -64,6 +64,13 @@ namespace SchedulingAPI
 
             app.UseHttpsRedirection();
 
+            app.UseCors(options =>
+            {
+                options.AllowAnyOrigin();
+                options.AllowAnyMethod();
+                options.AllowAnyHeader();
+            });
+
             app.UseRouting();
 
             app.UseAuthorization();

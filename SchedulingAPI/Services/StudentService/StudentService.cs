@@ -67,14 +67,11 @@ namespace SchedulingAPI.Services.StudentService
             var studentToUpdate = await ValidateStudent(studentId);
             if (simpleStudentDTO.StudentId != null && simpleStudentDTO.StudentId != studentId)
                 throw new Exception("Path Id and Body Id have to be the same");
-            if (simpleStudentDTO.FirstName == null)
-                simpleStudentDTO.FirstName = studentToUpdate.FirstName;
-            if (simpleStudentDTO.LastName == null)
-                simpleStudentDTO.LastName = studentToUpdate.LastName;
-            var student = mapper.Map<Student>(simpleStudentDTO);
-            var studentUpdated = await uow.StudentRepository.UpdateAsync(student);
+            studentToUpdate.FirstName = simpleStudentDTO.FirstName;
+            studentToUpdate.LastName = simpleStudentDTO.LastName;
+            var studentUpdated = await uow.StudentRepository.UpdateAsync(studentToUpdate);
             if (studentUpdated != null)
-                return mapper.Map<SimpleStudentDTO>(student);
+                return mapper.Map<SimpleStudentDTO>(studentUpdated);
             throw new Exception("There was an error with the DB");
         }
 

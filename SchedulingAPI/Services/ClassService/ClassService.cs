@@ -66,14 +66,11 @@ namespace SchedulingAPI.Services.ClassService
             var classToUpdate = await ValidateClass(code);
             if (simpleClassDTO.Code != null && simpleClassDTO.Code != code)
                 throw new Exception("Path Code and Body Code have to be the same");
-            if (simpleClassDTO.Title == null)
-                simpleClassDTO.Title = classToUpdate.Title;
-            if (simpleClassDTO.Description == null)
-                simpleClassDTO.Description = classToUpdate.Description;
-            var course = mapper.Map<Class>(simpleClassDTO);
-            var classUpdated = await uow.ClassRepository.UpdateAsync(course);
+            classToUpdate.Title = simpleClassDTO.Title;
+            classToUpdate.Description = simpleClassDTO.Description;
+            var classUpdated = await uow.ClassRepository.UpdateAsync(classToUpdate);
             if (classUpdated != null)
-                return mapper.Map<SimpleClassDTO>(course);
+                return mapper.Map<SimpleClassDTO>(classUpdated);
             throw new Exception("There was an error with the DB");
         }
 
