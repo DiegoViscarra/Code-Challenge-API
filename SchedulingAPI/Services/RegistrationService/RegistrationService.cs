@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SchedulingAPI.Data.Entities;
 using SchedulingAPI.Data.UnitOfWork;
+using SchedulingAPI.Exceptions;
 using SchedulingAPI.Models.DTOs;
 using System;
 using System.Collections.Generic;
@@ -20,26 +21,33 @@ namespace SchedulingAPI.Services.RegistrationService
 
         public async Task<RegistrationToStudentDTO> RegisterClasses(RegistrationToStudentDTO registrationToStudentDTO)
         {
-            if (await ValidateRegistrationToStudent(registrationToStudentDTO))
+            try
             {
-                List<RegistrationDTO> registrationsDTOs = new List<RegistrationDTO>();
-                foreach (var classDTO in registrationToStudentDTO.SimpleClassesDTOs)
+                if (await ValidateRegistrationToStudent(registrationToStudentDTO))
                 {
-                    await ValidateNotDoubleRegistration(classDTO.Code, registrationToStudentDTO.SimpleStudentDTO.StudentId);
-                    RegistrationDTO registrationDTO = new RegistrationDTO
+                    List<RegistrationDTO> registrationsDTOs = new List<RegistrationDTO>();
+                    foreach (var classDTO in registrationToStudentDTO.SimpleClassesDTOs)
                     {
-                        Code = classDTO.Code,
-                        StudentId = registrationToStudentDTO.SimpleStudentDTO.StudentId
-                    };
-                    registrationsDTOs.Add(registrationDTO);
+                        await ValidateNotDoubleRegistration(classDTO.Code, registrationToStudentDTO.SimpleStudentDTO.StudentId);
+                        RegistrationDTO registrationDTO = new RegistrationDTO
+                        {
+                            Code = classDTO.Code,
+                            StudentId = registrationToStudentDTO.SimpleStudentDTO.StudentId
+                        };
+                        registrationsDTOs.Add(registrationDTO);
+                    }
+                    var registrations = mapper.Map<List<Registration>>(registrationsDTOs);
+                    var createdRegistrations = await uow.RegistrationRepository.AddAllAsync(registrations);
+                    if (createdRegistrations != null)
+                        return registrationToStudentDTO;
+                    throw new DatabaseException("Classes were not registered");
                 }
-                var registrations = mapper.Map<List<Registration>>(registrationsDTOs);
-                var createdRegistrations = await uow.RegistrationRepository.AddAllAsync(registrations);
-                if (createdRegistrations != null)
-                    return registrationToStudentDTO;
-                throw new Exception("Classes were not registered");
+                throw new DatabaseException("There was an error while registering student to classes");
             }
-            throw new Exception("There was an error with the DB");
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e.InnerException);
+            }
         }
 
         private async Task<bool> ValidateRegistrationToStudent(RegistrationToStudentDTO registrationToStudentDTO)
@@ -56,31 +64,38 @@ namespace SchedulingAPI.Services.RegistrationService
         {
             var course = await uow.RegistrationRepository.GetOneByConditionAsync(r => r.Code == code && r.StudentId == studentId);
             if (course != null)
-                throw new Exception("The student is already registered to the class");
+                throw new AppException("The student is already registered to the class");
         }
 
         public async Task<RegistrationToClassDTO> RegisterStudents(RegistrationToClassDTO registrationToClassDTO)
         {
-            if (await ValidateRegistrationToClass(registrationToClassDTO))
+            try
             {
-                List<RegistrationDTO> registrationsDTOs = new List<RegistrationDTO>();
-                foreach (var studentDTO in registrationToClassDTO.SimpleStudentsDTOs)
+                if (await ValidateRegistrationToClass(registrationToClassDTO))
                 {
-                    await ValidateNotDoubleRegistration(registrationToClassDTO.SimpleClassDTO.Code, studentDTO.StudentId);
-                    RegistrationDTO registrationDTO = new RegistrationDTO
+                    List<RegistrationDTO> registrationsDTOs = new List<RegistrationDTO>();
+                    foreach (var studentDTO in registrationToClassDTO.SimpleStudentsDTOs)
                     {
-                        Code = registrationToClassDTO.SimpleClassDTO.Code,
-                        StudentId = studentDTO.StudentId
-                    };
-                    registrationsDTOs.Add(registrationDTO);
+                        await ValidateNotDoubleRegistration(registrationToClassDTO.SimpleClassDTO.Code, studentDTO.StudentId);
+                        RegistrationDTO registrationDTO = new RegistrationDTO
+                        {
+                            Code = registrationToClassDTO.SimpleClassDTO.Code,
+                            StudentId = studentDTO.StudentId
+                        };
+                        registrationsDTOs.Add(registrationDTO);
+                    }
+                    var registrations = mapper.Map<List<Registration>>(registrationsDTOs);
+                    var createdRegistrations = await uow.RegistrationRepository.AddAllAsync(registrations);
+                    if (createdRegistrations != null)
+                        return registrationToClassDTO;
+                    throw new DatabaseException("Students were not registered");
                 }
-                var registrations = mapper.Map<List<Registration>>(registrationsDTOs);
-                var createdRegistrations = await uow.RegistrationRepository.AddAllAsync(registrations);
-                if (createdRegistrations != null)
-                    return registrationToClassDTO;
-                throw new Exception("Students were not registered");
+                throw new DatabaseException("There was an error while registering class to students");
             }
-            throw new Exception("There was an error with the DB");
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e.InnerException);
+            }
         }
 
         private async Task<bool> ValidateRegistrationToClass(RegistrationToClassDTO registrationToClassDTO)
@@ -95,34 +110,41 @@ namespace SchedulingAPI.Services.RegistrationService
 
         public async Task<bool> DeleteRegistration(Guid code, Guid studentId)
         {
-            await ValidateClass(code);
-            await ValidateStudent(studentId);
-            var registration = await ValidateRegistration(code, studentId);
-            bool registrationDeleted = await uow.RegistrationRepository.DeleteOneAsync(registration);
-            if (registrationDeleted)
-                return true;
-            throw new Exception("There was an error deleting the student from the class");
+            try
+            {
+                await ValidateClass(code);
+                await ValidateStudent(studentId);
+                var registration = await ValidateRegistration(code, studentId);
+                bool registrationDeleted = await uow.RegistrationRepository.DeleteOneAsync(registration);
+                if (registrationDeleted)
+                    return true;
+                throw new DatabaseException("There was an error while deleting the student from the class");
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e.InnerException);
+            }
         }
 
         private async Task ValidateClass(Guid code)
         {
             var course = await uow.ClassRepository.GetOneByConditionAsync(c => c.Code == code);
             if (course == null)
-                throw new Exception("Class not found");
+                throw new NotFoundItemException($"Class with code {code} not found");
         }
 
         private async Task ValidateStudent(Guid studentId)
         {
             var student = await uow.StudentRepository.GetOneByConditionAsync(s => s.StudentId == studentId);
             if (student == null)
-                throw new Exception("Student not found");
+                throw new NotFoundItemException($"Student with studentId {studentId} not found");
         }
 
         private async Task<Registration> ValidateRegistration(Guid code, Guid studentId)
         {
             var registration = await uow.RegistrationRepository.GetOneByConditionAsync(r => r.Code == code && r.StudentId == studentId);
             if (registration == null)
-                throw new Exception("Registration not found");
+                throw new NotFoundItemException($"Student with studentId {studentId} not registered to class with code {code}");
             return registration;
         }
     }

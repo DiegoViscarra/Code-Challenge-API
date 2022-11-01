@@ -19,43 +19,22 @@ namespace SchedulingAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<SimpleStudentDTO>> GetAllStudents()
         {
-            try
-            {
-                var students = await studentService.GetAllStudents();
-                return Ok(students);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var students = await studentService.GetAllStudents();
+            return Ok(students);
         }
 
         [HttpGet("{studentId}")]
         public async Task<ActionResult<SimpleStudentDTO>> GetStudentById(Guid studentId)
         {
-            try
-            {
-                var student = await studentService.GetStudentById(studentId);
-                return Ok(student);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var student = await studentService.GetStudentById(studentId);
+            return Ok(student);
         }
 
         [HttpGet("{studentId}/classes")]
         public async Task<ActionResult<SimpleStudentDTO>> GetStudentByIdWithClasses(Guid studentId)
         {
-            try
-            {
-                var student = await studentService.GetStudentByIdWithClasses(studentId);
-                return Ok(student);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var student = await studentService.GetStudentByIdWithClasses(studentId);
+            return Ok(student);
         }
 
         [HttpPost]
@@ -65,15 +44,8 @@ namespace SchedulingAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var createdStudent = await studentService.AddStudent(simpleStudentDTO);
-                return Created($"/api/student/{createdStudent.StudentId}", createdStudent);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var createdStudent = await studentService.AddStudent(simpleStudentDTO);
+            return Created($"/api/student/{createdStudent.StudentId}", createdStudent);
         }
 
         [HttpPut("{studentId}")]
@@ -83,28 +55,14 @@ namespace SchedulingAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var studentUpdated = await studentService.UpdateStudent(studentId, simpleStudentDTO);
-                return Ok(studentUpdated);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            var studentUpdated = await studentService.UpdateStudent(studentId, simpleStudentDTO);
+            return Ok(studentUpdated);
         }
 
         [HttpDelete("{studentId}")]
         public async Task<ActionResult<bool>> DeleteStudent(Guid studentId)
         {
-            try
-            {
-                return Ok(await studentService.DeleteStudent(studentId));
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error:", e);
-            }
+            return Ok(await studentService.DeleteStudent(studentId));
         }
     }
 }
