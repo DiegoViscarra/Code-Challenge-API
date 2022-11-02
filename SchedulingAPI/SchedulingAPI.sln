@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchedulingAPI", "SchedulingAPI.csproj", "{30A8053F-84B6-47B8-A3F6-AD2B78C5CECD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchedulingAPI", "SchedulingAPI.csproj", "{30A8053F-84B6-47B8-A3F6-AD2B78C5CECD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchedulingAPITest", "..\SchedulingAPITest\SchedulingAPITest.csproj", "{9126F8EA-28F7-4439-BB44-BCD965F42108}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{30A8053F-84B6-47B8-A3F6-AD2B78C5CECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30A8053F-84B6-47B8-A3F6-AD2B78C5CECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30A8053F-84B6-47B8-A3F6-AD2B78C5CECD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9126F8EA-28F7-4439-BB44-BCD965F42108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9126F8EA-28F7-4439-BB44-BCD965F42108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9126F8EA-28F7-4439-BB44-BCD965F42108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9126F8EA-28F7-4439-BB44-BCD965F42108}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
